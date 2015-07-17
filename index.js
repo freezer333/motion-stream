@@ -23,13 +23,11 @@ var builder = function (o) {
         streamed_objects.push(object);
 
 
-        var pos_stream = make_stream(object);
-        var ori_stream = make_stream(object);
+        var po_stream = make_stream(object);
         
-        object.motion = {
-            pos: pos_stream, 
-            ori: ori_stream
-        }
+        
+        object.motion = []
+        object.motion.push(po_stream)
 
         var source_stream = highland();
         source_stream._mark = object;
@@ -54,8 +52,7 @@ var source_streams = [];
 var track = function () {
     var now = Date.now()
     streamed_objects.forEach(function(object){
-        object.motion.pos.write({object:object, time:now, position: object.position});
-        object.motion.ori.write({object:object, time:now, quaternion: object.quaternion});
+        object.motion[0].write({object:object, time:now, position: object.position, quaternion:object.quaternion});
     });
     requestAnimationFrame(track);
 }
