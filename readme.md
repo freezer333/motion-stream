@@ -33,8 +33,8 @@ mesh2 = new THREE.Mesh(geometry, material);
 
 //... add them to the scene... etc.
 
-motion.stream(mesh1);
-motion.stream(mesh2);
+// you can stream multiple objects with one call by passing an array
+motion.stream([mesh1, mesh2]);
 
 mesh1.motion.pos.map(
     function (x) {
