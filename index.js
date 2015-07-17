@@ -2,7 +2,7 @@ var highland = require('highland');
 
 
 var builder = function (o) {
-    if (streams.length == 0 ) {
+    if (streamed_objects.length == 0 ) {
         requestAnimationFrame(track);
     }
     var objects = []
@@ -13,12 +13,22 @@ var builder = function (o) {
         objects.push(o);
     }
 
+    var make_stream = function(object) {
+        var s = highland()
+        s._mark = object;
+        return s;
+    }
+
     objects.forEach(function (object) {
-        var new_stream = highland();
-        new_stream._mark = object;
-        streams.push(new_stream);
+        streamed_objects.push(object);
+
+
+        var pos_stream = make_stream(object);
+        var ori_stream = make_stream(object);
+        
         object.motion = {
-            pos: new_stream
+            pos: pos_stream, 
+            ori: ori_stream
         }
 
         var source_stream = highland();
@@ -31,17 +41,21 @@ var builder = function (o) {
                 source_stream._mark.position.y = m.position.y; 
                 source_stream._mark.position.z = m.position.z; 
             }
+            if ( m.quaternion) {
+                source_stream._mark.quaternion.copy(m.quaternion);
+            }
         });
     })
 }
 
-var streams = [];
+var streamed_objects = [];
 var source_streams = [];
 
 var track = function () {
     var now = Date.now()
-    streams.forEach(function(stream){
-        stream.write({object:stream._mark, time:now, position: stream._mark.position});
+    streamed_objects.forEach(function(object){
+        object.motion.pos.write({object:object, time:now, position: object.position});
+        object.motion.ori.write({object:object, time:now, quaternion: object.quaternion});
     });
     requestAnimationFrame(track);
 }
