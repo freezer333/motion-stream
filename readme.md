@@ -9,7 +9,7 @@ Motion output streams
 
 the motion object exported from the module also included constants PO  = 0, VEL = 1, ACC = 2 for convenience.
 
-**Important:  ** When consuming the motion streams, you must call `fork` on the stream.  The velocity streams are already pulling from the position/orientation streams, and the acceleration streams are already sourcing the velocity streams - so you'll get a "multiple consumer" error if you do not use fork!
+**Important:**  When consuming the motion streams, you must call `fork` on the stream.  The velocity streams are already pulling from the position/orientation streams, and the acceleration streams are already sourcing the velocity streams - so you'll get a "multiple consumer" error if you do not use fork!
 
 Below is a simple example that pipes the position data of an object to standard out.
 
