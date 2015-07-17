@@ -56,21 +56,17 @@ var builder = function (o, opts) {
             }
             vel.positions.push({
                 time : now,
-                position: {
-                    x : object.position.x, 
-                    y : object.position.y, 
-                    z : object.position.z
-                }
+                position: new THREE.Vector3(object.position.x, object.position.y, object.position.z)
             });
-            velocity = {x:0, y:0, z:0}
+            velocity = new THREE.Vector3();
             
             if (baseline >= 0) {
                 last = vel.positions.length-1;
-                velocity = {
-                    x : vel.positions[last].position.x - vel.positions[baseline].position.x, 
-                    y : vel.positions[last].position.y - vel.positions[baseline].position.y, 
-                    z : vel.positions[last].position.z - vel.positions[baseline].position.z
-                }
+                velocity = new THREE.Vector3(
+                    vel.positions[last].position.x - vel.positions[baseline].position.x, 
+                    vel.positions[last].position.y - vel.positions[baseline].position.y, 
+                    vel.positions[last].position.z - vel.positions[baseline].position.z
+                )
                     
                     
                 vel.positions = vel.positions.slice(baseline);
