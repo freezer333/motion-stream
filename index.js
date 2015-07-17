@@ -1,7 +1,7 @@
 var highland = require('highland');
 
 
-var builder = function (o) {
+var builder = function (o, opts) {
     if (streamed_objects.length == 0 ) {
         requestAnimationFrame(track);
     }
@@ -19,18 +19,70 @@ var builder = function (o) {
         return s;
     }
 
+    var params = {
+        translation_velocity_window : (opts && opts.translation_velocity_window) || 500, 
+        rotational_velocity_window : (opts && opts.rotational_velocity_window) || 500
+    }
+    
     objects.forEach(function (object) {
         streamed_objects.push(object);
 
 
         var po_stream = make_stream(object);
+        var velocity_stream = make_stream(object);
         
         
-        object.motion = []
-        object.motion.push(po_stream)
+        object.motion = [];
+        object.motion.push(po_stream);
+        object.motion.push(velocity_stream);
 
-        var source_stream = highland();
-        source_stream._mark = object;
+
+        var vel = {
+            window: params.translation_velocity_window, 
+            positions : []
+        }
+        var track_velocity = function(object) {
+            now = Date.now()
+            baseline = -1
+
+            for (var i = 0; i < vel.positions.length; i++) {
+                p = vel.positions[i]
+                if (now - p.time > vel.window) {
+                    baseline = i;
+                }
+                else if (now - p.time < vel.window) {
+                    break;
+                }
+            }
+            vel.positions.push({
+                time : now,
+                position: {
+                    x : object.position.x, 
+                    y : object.position.y, 
+                    z : object.position.z
+                }
+            });
+            velocity = {x:0, y:0, z:0}
+            
+            if (baseline >= 0) {
+                last = vel.positions.length-1;
+                velocity = {
+                    x : vel.positions[last].position.x - vel.positions[baseline].position.x, 
+                    y : vel.positions[last].position.y - vel.positions[baseline].position.y, 
+                    z : vel.positions[last].position.z - vel.positions[baseline].position.z
+                }
+                    
+                    
+                vel.positions = vel.positions.slice(baseline);
+
+            }
+            
+            return { object : object.object, time:object.time, translation : velocity}
+        }
+        
+        object.motion[0].fork().map(track_velocity).pipe(object.motion[1]);
+
+        var source_stream = make_stream(object);
         object.motion.source = source_stream;
 
         source_stream.on('data', function(m) {

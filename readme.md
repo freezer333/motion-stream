@@ -22,9 +22,19 @@ motion.stream(mesh);
 
 // pipe position to stdout
 mesh.motion[0].map(
-        function(x){
-            return JSON.stringify(x.position) + "\n"
+        function(o){
+            return JSON.stringify(o.position) + "\n"
         }).pipe(process.stdout);
+```
+
+The following would pipe the translational velocity of the same mesh
+
+```js
+mesh.motion[1].map(
+        function(velocity){
+            return JSON.stringify(velocity.translation) + "\n"
+        }).pipe(process.stdout);
+
 ```
 
 # Controlling motion of object 
