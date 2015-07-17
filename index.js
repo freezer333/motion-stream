@@ -58,3 +58,6 @@ var track = function () {
 }
 
 exports.stream = builder;
+exports.PO = 0
+exports.VEL = 1
+exports.ACC = 2

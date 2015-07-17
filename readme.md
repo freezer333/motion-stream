@@ -2,9 +2,12 @@
 
 The `stream` function attaches several streams to an object which report position, velocity, and acceleration.  The streams are implemented with [highland](http://highlandjs.org/), and you can hook into them under the `motion` object of the THREE.js object once created.
 
-motion[0] is the position and orientation stream
-motion[1] is the translation and angular velocity stream
-motion[2] is the translation and angular acceleration stream
+Motion output streams
+- motion[0] is the position and orientation stream
+- motion[1] is the translation and angular velocity stream
+- motion[2] is the translation and angular acceleration stream
+
+the motion object exported from the module also included constants PO  = 0, VEL = 1, ACC = 2 for convenience
 
 Below is a simple example that pipes the position data of an object to standard out.
 
