@@ -15,6 +15,9 @@
     "streaming",
     "motion"
   ],
+  "dependencies": {
+    "highland" : "*"
+  },
   "author": "Scott Frees <scott.frees@gmail.com> (http://scottfrees.com/)",
   "license": "MIT",
   "bugs": {
