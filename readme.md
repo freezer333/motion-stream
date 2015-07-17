@@ -7,7 +7,9 @@ Motion output streams
 - motion[1] is the translation and angular velocity stream
 - motion[2] is the translation and angular acceleration stream
 
-the motion object exported from the module also included constants PO  = 0, VEL = 1, ACC = 2 for convenience
+the motion object exported from the module also included constants PO  = 0, VEL = 1, ACC = 2 for convenience.
+
+**Important:  ** When consuming the motion streams, you must call `fork` on the stream.  The velocity streams are already pulling from the position/orientation streams, and the acceleration streams are already sourcing the velocity streams - so you'll get a "multiple consumer" error if you do not use fork!
 
 Below is a simple example that pipes the position data of an object to standard out.
 
@@ -21,7 +23,7 @@ mesh = new THREE.Mesh(geometry, material);
 motion.stream(mesh);  
 
 // pipe position to stdout
-mesh.motion[0].map(
+mesh.motion[0].fork().map(
         function(o){
             return JSON.stringify(o.position) + "\n"
         }).pipe(process.stdout);
@@ -30,7 +32,7 @@ mesh.motion[0].map(
 The following would pipe the translational velocity of the same mesh
 
 ```js
-mesh.motion[1].map(
+mesh.motion[1].fork().map(
         function(velocity){
             return JSON.stringify(velocity.translation) + "\n"
         }).pipe(process.stdout);
