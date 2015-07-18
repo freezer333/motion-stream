@@ -62,10 +62,11 @@ var builder = function (o, opts) {
             
             if (baseline >= 0) {
                 last = vel.positions.length-1;
+                time_delta = (now - vel.positions[baseline].time) * 1000;
                 velocity = new THREE.Vector3(
-                    vel.positions[last].position.x - vel.positions[baseline].position.x, 
-                    vel.positions[last].position.y - vel.positions[baseline].position.y, 
-                    vel.positions[last].position.z - vel.positions[baseline].position.z
+                    (vel.positions[last].position.x - vel.positions[baseline].position.x)/time_delta, 
+                    (vel.positions[last].position.y - vel.positions[baseline].position.y)/time_delta, 
+                    (vel.positions[last].position.z - vel.positions[baseline].position.z)/time_delta
                 )
                     
                     
