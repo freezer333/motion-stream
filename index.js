@@ -35,7 +35,7 @@ var builder = function (o, opts) {
         object.motion = [];
         object.motion.push(po_stream);
         object.motion.push(velocity_stream);
-
+        object.motion.snapshot = {}
 
         var vel = {
             window: params.translation_velocity_window, 
@@ -74,7 +74,20 @@ var builder = function (o, opts) {
 
             }
             
-            return { object : object.object, time:object.time, translation : velocity}
+            if ( !object.object.motion.snapshot) {
+                object.motion.snapshot = {}
+            }
+            object.object.motion.snapshot.time = now;
+            object.object.motion.snapshot.position = object.position.clone();
+            object.object.motion.snapshot.quaterion = object.quaternion.clone();
+            object.object.motion.snapshot.velocity = {
+                translation : velocity
+            }
+            return { object : object.object, time:object.time, 
+                velocity: {
+                    translation : velocity
+                }
+            }
         }
         
         object.motion[0].fork().map(track_velocity).pipe(object.motion[1]);
@@ -88,9 +101,11 @@ var builder = function (o, opts) {
                 source_stream._mark.position.y = m.position.y; 
                 source_stream._mark.position.z = m.position.z; 
             }
+            
             if ( m.quaternion) {
                 source_stream._mark.quaternion.copy(m.quaternion);
             }
+
         });
     })
 }
@@ -102,6 +117,12 @@ var track = function () {
     var now = Date.now()
     streamed_objects.forEach(function(object){
         object.motion[0].write({object:object, time:now, position: object.position, quaternion:object.quaternion});
+        if (!object.motion.snapshot) {
+            object.motion.snapshot = {}
+        }
+        object.motion.snapshot.time = now;
+        object.motion.snapshot.position = object.position.clone();
+        object.motion.snapshot.quaterion = object.quaternion.clone();
     });
     requestAnimationFrame(track);
 }
