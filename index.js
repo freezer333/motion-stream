@@ -62,7 +62,7 @@ var builder = function (o, opts) {
             
             if (baseline >= 0) {
                 last = vel.positions.length-1;
-                time_delta = (now - vel.positions[baseline].time) * 1000;
+                time_delta = (now - vel.positions[baseline].time) / 1000;
                 velocity = new THREE.Vector3(
                     (vel.positions[last].position.x - vel.positions[baseline].position.x)/time_delta, 
                     (vel.positions[last].position.y - vel.positions[baseline].position.y)/time_delta, 
@@ -75,7 +75,7 @@ var builder = function (o, opts) {
             }
             
             if ( !object.object.motion.snapshot) {
-                object.motion.snapshot = {}
+                object.object.motion.snapshot = {}
             }
             object.object.motion.snapshot.time = now;
             object.object.motion.snapshot.position = object.position.clone();
@@ -94,17 +94,29 @@ var builder = function (o, opts) {
 
         var source_stream = make_stream(object);
         object.motion.source = source_stream;
+        var last_time = -1;
 
         source_stream.on('data', function(m) {
+            var now = Date.now();
+            //console.log(JSON.stringify(m));
             if (m.position) {
                 source_stream._mark.position.x = m.position.x; 
                 source_stream._mark.position.y = m.position.y; 
                 source_stream._mark.position.z = m.position.z; 
             }
+            else if (m.velocity && m.velocity.translation && m.object.motion.snapshot && last_time > 0) {
+                // velocity is in units/sec, so get delta time in seconds
+                var delta_t = (now - last_time) / 1000
+                var delta_p = m.velocity.translation.multiplyScalar(delta_t);
+                source_stream._mark.position.add(delta_p);
+                
+            }
             
+
             if ( m.quaternion) {
                 source_stream._mark.quaternion.copy(m.quaternion);
             }
+            last_time = now
 
         });
     })
@@ -116,13 +128,15 @@ var source_streams = [];
 var track = function () {
     var now = Date.now()
     streamed_objects.forEach(function(object){
-        object.motion[0].write({object:object, time:now, position: object.position, quaternion:object.quaternion});
         if (!object.motion.snapshot) {
             object.motion.snapshot = {}
         }
         object.motion.snapshot.time = now;
         object.motion.snapshot.position = object.position.clone();
         object.motion.snapshot.quaterion = object.quaternion.clone();
+
+        object.motion[0].write({object:object, time:now, position: object.position, quaternion:object.quaternion});
+        
     });
     requestAnimationFrame(track);
 }
