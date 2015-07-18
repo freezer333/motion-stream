@@ -64,3 +64,16 @@ mesh1.motion[0].map(
     }
 ).pipe(mesh2.motion.source);
 ```
+
+Velocity and acceleration streams can also be piped into the source stream (although you can't pipe multiple streams into the same object's source stream).  The example below would cause mesh2 to move in the Y direction at 5 times the speed of mesh1's X axis speed:
+
+```js
+mesh1.motion[motion.VEL].fork().map(function (o){
+        var tmp = o.velocity.translation.y;
+        o.velocity.translation = o.velocity.translation.clone();
+        // clone so this doesn't effect any othe velocity consumers
+        o.velocity.translation.y = o.velocity.translation.x * 5
+        o.velocity.translation.x = tmp;
+        return o;
+    }).pipe(mesh2.motion.source);
+```
